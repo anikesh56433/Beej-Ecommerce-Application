@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: beej-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: beej_ecommerce
+      MYSQL_USER: beej_user
+      MYSQL_PASSWORD: beej_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - beej-network
+
+  # Backend Spring Boot Application
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: beej-backend
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/beej_ecommerce
+      SPRING_DATASOURCE_USERNAME: beej_user
+      SPRING_DATASOURCE_PASSWORD: beej_password
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysql
+    networks:
+      - beej-network
+
+  # Frontend React Application
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: beej-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - beej-network
+
+volumes:
+  mysql_data:
+
+networks:
+  beej-network:
+    driver: bridge
