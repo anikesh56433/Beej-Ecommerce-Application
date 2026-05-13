@@ -36,37 +36,93 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public AuthResponseDTO register(RegisterRequestDTO registerRequest) {
+
+        System.out.println("===== REGISTER API STARTED =====");
+
+        System.out.println("Username: " + registerRequest.getUsername());
+        System.out.println("Email: " + registerRequest.getEmail());
+
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            System.out.println("Username already exists");
             throw new BadRequestException("Username is already taken");
         }
 
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            System.out.println("Email already exists");
             throw new BadRequestException("Email is already registered");
         }
 
+        System.out.println("Creating User Object");
+
         User user = authMapper.toUser(registerRequest);
+
+        System.out.println("User mapped successfully");
+
         user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+        System.out.println("Password encoded");
+
         user.setRole(RoleType.USER);
+        System.out.println("Role set: " + user.getRole());
+
         user.setVerificationToken(UUID.randomUUID().toString());
+        System.out.println("Verification token generated");
+
+        System.out.println("Saving user to database...");
 
         User savedUser = userRepository.save(user);
 
-        // TODO: Send verification email
-        // emailService.sendVerificationEmail(savedUser.getEmail(), savedUser.getVerificationToken());
+        System.out.println("User saved successfully");
+        System.out.println("Saved User ID: " + savedUser.getId());
+        System.out.println("Saved Username: " + savedUser.getUsername());
+        System.out.println("Saved Role: " + savedUser.getRole());
 
-        // Create authentication object for token generation
-        Authentication auth = new UsernamePasswordAuthenticationToken(
-                savedUser.getUsername(),
-                null,
-                savedUser.getAuthorities()
-        );
-        String token = tokenProvider.generateToken(auth);
+        try {
 
-        return authMapper.toAuthResponse(savedUser, token);
+            System.out.println("Getting authorities...");
+            System.out.println("Authorities: " + savedUser.getAuthorities());
+
+            System.out.println("Creating Authentication object...");
+
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                    savedUser,
+                    null,
+                    savedUser.getAuthorities()
+            );
+
+            System.out.println("Authentication object created");
+
+            System.out.println("Generating JWT token...");
+
+            String token = tokenProvider.generateToken(auth);
+
+            System.out.println("JWT Token Generated Successfully");
+
+            System.out.println("Creating AuthResponseDTO");
+
+            AuthResponseDTO response =
+                    authMapper.toAuthResponse(savedUser, token);
+
+            System.out.println("Response created successfully");
+
+            System.out.println("===== REGISTER API COMPLETED =====");
+
+            return response;
+
+        } catch (Exception e) {
+
+            System.out.println("===== ERROR OCCURRED =====");
+
+            e.printStackTrace();
+
+            throw e;
+        }
     }
 
     @Override
     public AuthResponseDTO login(LoginRequestDTO loginRequest) {
+
+        System.out.println(passwordEncoder.encode("Admin@123"));
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getUsername(),
@@ -75,39 +131,36 @@ public class AuthServiceImpl implements AuthService {
         );
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        
+
         String token = tokenProvider.generateToken(authentication);
-        
-        org.springframework.security.core.userdetails.User userDetails = 
-                (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-        
-        User user = userRepository.findByUsername(userDetails.getUsername())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        User user = (User) authentication.getPrincipal();
 
         return authMapper.toAuthResponse(user, token);
     }
 
     @Override
     public AuthResponseDTO refreshToken(String token) {
+
         if (!tokenProvider.validateToken(token)) {
             throw new UnauthorizedException("Invalid token");
         }
 
         String username = tokenProvider.getUsernameFromToken(token);
+
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        // Create authentication object for token generation
         Authentication auth = new UsernamePasswordAuthenticationToken(
-                user.getUsername(),
+                user,
                 null,
                 user.getAuthorities()
         );
+
         String newToken = tokenProvider.generateToken(auth);
 
         return authMapper.toAuthResponse(user, newToken);
     }
-
     @Override
     public void logout(String token) {
         // TODO: Implement token blacklisting if needed

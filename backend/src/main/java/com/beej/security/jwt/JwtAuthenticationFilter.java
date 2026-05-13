@@ -30,6 +30,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
         
+        String requestPath = request.getRequestURI();
+        String contextPath = request.getContextPath();
+        String pathWithoutContext = requestPath.substring(contextPath.length());
+        
+        logger.debug("Request path: " + requestPath);
+        logger.debug("Context path: " + contextPath);
+        logger.debug("Path without context: " + pathWithoutContext);
+        
+        // Skip JWT validation for public endpoints
+        if (pathWithoutContext.startsWith("/auth/") || 
+            pathWithoutContext.startsWith("/public/") ||
+            pathWithoutContext.startsWith("/api-docs") ||
+            pathWithoutContext.startsWith("/swagger-ui")) {
+            logger.debug("Skipping JWT validation for public endpoint: " + pathWithoutContext);
+            filterChain.doFilter(request, response);
+            return;
+        }
+        
         try {
             String jwt = getJwtFromRequest(request);
 

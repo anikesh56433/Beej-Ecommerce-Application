@@ -1,16 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { logout } from '../../store/slices/authSlice'
-import { ShoppingCart, User, Search, Menu, X } from 'lucide-react'
+import { toggleMobileMenu, toggleDarkMode, toggleSearchModal, selectMobileMenuOpen, selectDarkMode } from '../../store/slices/uiSlice'
+import { ShoppingCart, User, Search, Menu, X, Moon, Sun, Heart } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 const Header = () => {
   const dispatch = useDispatch()
   const navigate = useNavigate()
   const { isAuthenticated, user } = useSelector((state) => state.auth)
   const { totalItems } = useSelector((state) => state.cart)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const mobileMenuOpen = useSelector(selectMobileMenuOpen)
+  const darkMode = useSelector(selectDarkMode)
   const [searchQuery, setSearchQuery] = useState('')
+  const [isScrolled, setIsScrolled] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const handleLogout = () => {
     dispatch(logout())
@@ -22,205 +34,333 @@ const Header = () => {
     if (searchQuery.trim()) {
       navigate(`/products?q=${encodeURIComponent(searchQuery.trim())}`)
       setSearchQuery('')
-      setIsMobileMenuOpen(false)
+      dispatch(toggleMobileMenu())
     }
   }
 
+  const handleMobileMenuToggle = () => {
+    dispatch(toggleMobileMenu())
+  }
+
+  const handleDarkModeToggle = () => {
+    dispatch(toggleDarkMode())
+  }
+
+  const handleSearchModalOpen = () => {
+    dispatch(toggleSearchModal())
+  }
+
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-50">
+    <motion.header 
+      className={`bg-white/95 backdrop-blur-md shadow-sm sticky top-0 z-50 transition-all duration-300 ${isScrolled ? 'shadow-lg' : 'shadow-sm'}`}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.3 }}
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center">
-            <span className="text-2xl font-bold text-primary">🛒 Beej</span>
+          <Link to="/" className="flex items-center group">
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              transition={{ duration: 0.2 }}
+              className="flex items-center"
+            >
+              <span className="text-3xl font-bold bg-gradient-to-r from-beej-green to-beej-green-light bg-clip-text text-transparent">
+                BEEJ
+              </span>
+              <span className="ml-2 text-xs text-beej-brown font-medium tracking-wider">
+                Root. Rise. Refine.
+              </span>
+            </motion.div>
           </Link>
 
           {/* Search Bar - Desktop */}
           <form onSubmit={handleSearch} className="hidden md:flex flex-1 max-w-lg mx-8">
-            <div className="relative w-full">
+            <div className="relative w-full group">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                placeholder="Search for healthy seeds..."
+                className="w-full pl-10 pr-4 py-2.5 border border-beej-green/30 rounded-full focus:outline-none focus:ring-2 focus:ring-beej-green focus:border-beej-green transition-all duration-200 bg-beej-beige/20 focus:bg-white"
               />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+              <Search className="absolute left-3 top-2.5 h-5 w-5 text-beej-brown/50 group-focus-within:text-beej-green transition-colors duration-200" />
             </div>
           </form>
 
           {/* Navigation - Desktop */}
-          <nav className="hidden md:flex items-center space-x-6">
-            <Link to="/products" className="text-gray-700 hover:text-primary">
+          <nav className="hidden md:flex items-center space-x-4">
+            {/* Dark Mode Toggle */}
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleDarkModeToggle}
+              className="p-2 rounded-full hover:bg-beej-green/10 transition-colors duration-200"
+            >
+              {darkMode ? (
+                <Sun className="h-5 w-5 text-beej-brown" />
+              ) : (
+                <Moon className="h-5 w-5 text-beej-brown" />
+              )}
+            </motion.button>
+
+            {/* Navigation Links */}
+            <Link to="/products" className="text-beej-brown hover:text-beej-green font-medium transition-colors duration-200">
               Products
             </Link>
-            <Link to="/categories" className="text-gray-700 hover:text-primary">
+            <Link to="/categories" className="text-beej-brown hover:text-beej-green font-medium transition-colors duration-200">
               Categories
             </Link>
+            <Link to="/about" className="text-beej-brown hover:text-beej-green font-medium transition-colors duration-200">
+              About
+            </Link>
+            <Link to="/blog" className="text-beej-brown hover:text-beej-green font-medium transition-colors duration-200">
+              Blog
+            </Link>
+
             {isAuthenticated ? (
               <>
-                <Link to="/cart" className="relative text-gray-700 hover:text-primary">
-                  <ShoppingCart className="h-6 w-6" />
-                  {totalItems > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                      {totalItems}
-                    </span>
-                  )}
-                </Link>
+                {/* Wishlist */}
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="p-2 rounded-full hover:bg-beej-green/10 transition-colors duration-200"
+                >
+                  <Heart className="h-5 w-5 text-beej-brown hover:text-red-500" />
+                </motion.button>
+
+                {/* Cart */}
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link to="/cart" className="relative p-2 rounded-full hover:bg-beej-green/10 transition-colors duration-200">
+                    <ShoppingCart className="h-5 w-5 text-beej-brown" />
+                    {totalItems > 0 && (
+                      <motion.span
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold"
+                      >
+                        {totalItems}
+                      </motion.span>
+                    )}
+                  </Link>
+                </motion.div>
+
+                {/* User Dropdown */}
                 <div className="relative group">
-                  <button className="flex items-center text-gray-700 hover:text-primary">
-                    <User className="h-6 w-6" />
-                    <span className="ml-1">{user?.firstName || 'Account'}</span>
-                  </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    className="flex items-center space-x-2 p-2 rounded-full hover:bg-beej-green/10 transition-colors duration-200"
+                  >
+                    <User className="h-5 w-5 text-beej-brown" />
+                    <span className="text-sm font-medium text-beej-brown">
+                      {user?.firstName || 'Account'}
+                    </span>
+                  </motion.button>
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    className="absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-xl border border-beej-green/20 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
+                  >
                     <Link
                       to="/profile"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-beej-brown hover:bg-beej-green/10 transition-colors duration-200"
                     >
                       Profile
                     </Link>
                     <Link
                       to="/orders"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      className="block px-4 py-2 text-beej-brown hover:bg-beej-green/10 transition-colors duration-200"
                     >
                       Orders
+                    </Link>
+                    <Link
+                      to="/wishlist"
+                      className="block px-4 py-2 text-beej-brown hover:bg-beej-green/10 transition-colors duration-200"
+                    >
+                      Wishlist
                     </Link>
                     {user?.role === 'ADMIN' && (
                       <Link
                         to="/admin"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        className="block px-4 py-2 text-beej-brown hover:bg-beej-green/10 transition-colors duration-200"
                       >
                         Admin Dashboard
                       </Link>
                     )}
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                      className="block w-full text-left px-4 py-2 text-red-500 hover:bg-red-50 transition-colors duration-200"
                     >
                       Logout
                     </button>
-                  </div>
+                  </motion.div>
                 </div>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-gray-700 hover:text-primary">
+                <Link to="/login" className="text-beej-brown hover:text-beej-green font-medium transition-colors duration-200">
                   Login
                 </Link>
-                <Link
-                  to="/register"
-                  className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90"
-                >
-                  Sign Up
-                </Link>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Link
+                    to="/register"
+                    className="bg-beej-green text-white px-6 py-2 rounded-full hover:bg-beej-green-dark transition-all duration-200 shadow-md hover:shadow-lg"
+                  >
+                    Sign Up
+                  </Link>
+                </motion.div>
               </>
             )}
           </nav>
 
           {/* Mobile Menu Button */}
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden text-gray-700"
+          <motion.button
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={handleMobileMenuToggle}
+            className="md:hidden p-2 rounded-full hover:bg-beej-green/10 transition-colors duration-200"
           >
-            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
+            {mobileMenuOpen ? (
+              <X className="h-6 w-6 text-beej-brown" />
+            ) : (
+              <Menu className="h-6 w-6 text-beej-brown" />
+            )}
+          </motion.button>
         </div>
 
         {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className="md:hidden py-4 border-t">
-            {/* Mobile Search */}
-            <form onSubmit={handleSearch} className="mb-4">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                />
-                <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-              </div>
-            </form>
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3 }}
+              className="md:hidden border-t border-beej-green/20 overflow-hidden"
+            >
+              <div className="py-4 space-y-4">
+                {/* Mobile Search */}
+                <form onSubmit={handleSearch} className="px-4">
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search for healthy seeds..."
+                      className="w-full pl-10 pr-4 py-2.5 border border-beej-green/30 rounded-full focus:outline-none focus:ring-2 focus:ring-beej-green focus:border-beej-green bg-beej-beige/20"
+                    />
+                    <Search className="absolute left-3 top-2.5 h-5 w-5 text-beej-brown/50" />
+                  </div>
+                </form>
 
-            {/* Mobile Navigation */}
-            <nav className="space-y-2">
-              <Link
-                to="/products"
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Products
-              </Link>
-              <Link
-                to="/categories"
-                className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Categories
-              </Link>
-              {isAuthenticated ? (
-                <>
+                {/* Mobile Navigation */}
+                <nav className="space-y-1 px-4">
                   <Link
-                    to="/cart"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    to="/products"
+                    className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                    onClick={handleMobileMenuToggle}
                   >
-                    Cart ({totalItems})
+                    Products
                   </Link>
                   <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    to="/categories"
+                    className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                    onClick={handleMobileMenuToggle}
                   >
-                    Profile
+                    Categories
                   </Link>
                   <Link
-                    to="/orders"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsMobileMenuOpen(false)}
+                    to="/about"
+                    className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                    onClick={handleMobileMenuToggle}
                   >
-                    Orders
+                    About
                   </Link>
-                  {user?.role === 'ADMIN' && (
-                    <Link
-                      to="/admin"
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                      onClick={() => setIsMobileMenuOpen(false)}
-                    >
-                      Admin Dashboard
-                    </Link>
+                  <Link
+                    to="/blog"
+                    className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                    onClick={handleMobileMenuToggle}
+                  >
+                    Blog
+                  </Link>
+
+                  {isAuthenticated ? (
+                    <>
+                      <div className="border-t border-beej-green/20 pt-2 mt-2">
+                        <Link
+                          to="/cart"
+                          className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                          onClick={handleMobileMenuToggle}
+                        >
+                          Cart ({totalItems})
+                        </Link>
+                        <Link
+                          to="/wishlist"
+                          className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                          onClick={handleMobileMenuToggle}
+                        >
+                          Wishlist
+                        </Link>
+                        <Link
+                          to="/profile"
+                          className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                          onClick={handleMobileMenuToggle}
+                        >
+                          Profile
+                        </Link>
+                        <Link
+                          to="/orders"
+                          className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                          onClick={handleMobileMenuToggle}
+                        >
+                          Orders
+                        </Link>
+                        {user?.role === 'ADMIN' && (
+                          <Link
+                            to="/admin"
+                            className="block px-4 py-3 text-beej-brown hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium"
+                            onClick={handleMobileMenuToggle}
+                          >
+                            Admin Dashboard
+                          </Link>
+                        )}
+                        <button
+                          onClick={() => {
+                            handleLogout()
+                            handleMobileMenuToggle()
+                          }}
+                          className="block w-full text-left px-4 py-3 text-red-500 hover:bg-red-50 rounded-lg transition-colors duration-200 font-medium"
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="border-t border-beej-green/20 pt-2 mt-2 space-y-2">
+                      <Link
+                        to="/login"
+                        className="block w-full px-4 py-3 text-beej-green hover:bg-beej-green/10 rounded-lg transition-colors duration-200 font-medium text-center"
+                        onClick={handleMobileMenuToggle}
+                      >
+                        Login
+                      </Link>
+                      <Link
+                        to="/register"
+                        className="block w-full px-4 py-3 bg-beej-green text-white hover:bg-beej-green-dark rounded-lg transition-colors duration-200 font-medium text-center"
+                        onClick={handleMobileMenuToggle}
+                      >
+                        Sign Up
+                      </Link>
+                    </div>
                   )}
-                  <button
-                    onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Login
-                  </Link>
-                  <Link
-                    to="/register"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </nav>
-          </div>
-        )}
+                </nav>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-    </header>
+    </motion.header>
   )
 }
 

@@ -1,6 +1,6 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Navigate, Outlet, useLocation } from 'react-router-dom'
 
 const ProtectedRoute = ({ children, requiredRole = null }) => {
   const { isAuthenticated, user, loading } = useSelector((state) => state.auth)
@@ -22,7 +22,7 @@ const ProtectedRoute = ({ children, requiredRole = null }) => {
     return <Navigate to="/unauthorized" replace />
   }
 
-  return children
+  return children ?? <Outlet />
 }
 
 export default ProtectedRoute

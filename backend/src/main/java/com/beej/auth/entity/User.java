@@ -4,6 +4,7 @@ import com.beej.common.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
@@ -52,19 +53,24 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private RoleType role;
 
+    @Default
     @Column(nullable = false)
     private boolean enabled = true;
 
-    @Column(name = "account_non_expired")
+    @Default
+    @Column(name = "account_non_expired", nullable = false)
     private boolean accountNonExpired = true;
 
-    @Column(name = "account_non_locked")
+    @Default
+    @Column(name = "account_non_locked", nullable = false)
     private boolean accountNonLocked = true;
 
-    @Column(name = "credentials_non_expired")
+    @Default
+    @Column(name = "credentials_non_expired", nullable = false)
     private boolean credentialsNonExpired = true;
 
-    @Column(name = "email_verified")
+    @Default
+    @Column(name = "email_verified", nullable = false)
     private boolean emailVerified = false;
 
     @Column(name = "verification_token")
@@ -87,10 +93,20 @@ public class User implements UserDetails {
     @Version
     private Long version;
 
-    // UserDetails implementation
+    // ===============================
+    // UserDetails Implementation
+    // ===============================
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
+
+        if (role == null) {
+            return List.of();
+        }
+
+        return List.of(
+                new SimpleGrantedAuthority("ROLE_" + role.name())
+        );
     }
 
     @Override

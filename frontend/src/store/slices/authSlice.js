@@ -59,6 +59,43 @@ export const loadUser = createAsyncThunk(
   }
 )
 
+export const forgotPassword = createAsyncThunk(
+  'auth/forgotPassword',
+  async (email, { rejectWithValue }) => {
+    try {
+      const response = await authService.forgotPassword(email)
+      return response
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to send reset email')
+    }
+  }
+)
+
+export const verifyEmail = createAsyncThunk(
+  'auth/verifyEmail',
+  async (otp, { rejectWithValue }) => {
+    try {
+      const response = await authService.verifyEmail(otp)
+      return response
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to verify email')
+    }
+  }
+)
+
+export const updateProfile = createAsyncThunk(
+  'auth/updateProfile',
+  async (profileData, { rejectWithValue }) => {
+    try {
+      const response = await authService.updateProfile(profileData)
+      return response
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to update profile')
+    }
+  }
+)
+
+
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
@@ -165,6 +202,46 @@ const authSlice = createSlice({
         state.isAuthenticated = false
         state.loading = false
         state.error = null
+      })
+      // Forgot Password
+      .addCase(forgotPassword.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Verify Email
+      .addCase(verifyEmail.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(verifyEmail.fulfilled, (state, action) => {
+        state.loading = false
+        state.error = null
+      })
+      .addCase(verifyEmail.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+      })
+      // Update Profile
+      .addCase(updateProfile.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(updateProfile.fulfilled, (state, action) => {
+        state.loading = false
+        state.user = { ...state.user, ...action.payload }
+        state.error = null
+      })
+      .addCase(updateProfile.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
       })
   },
 })

@@ -14,10 +14,11 @@ const LoadingSpinner = ({
   }
 
   const colors = {
-    primary: 'text-primary',
-    secondary: 'text-secondary',
-    destructive: 'text-destructive',
-    muted: 'text-muted-foreground',
+    primary: 'text-beej-green',
+    secondary: 'text-beej-brown',
+    destructive: 'text-red-500',
+    muted: 'text-beej-brown/50',
+    white: 'text-white',
   }
 
   return (

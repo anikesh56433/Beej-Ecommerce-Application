@@ -13,12 +13,14 @@ const Button = React.forwardRef(({
   const baseClasses = 'btn inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none ring-offset-background'
   
   const variants = {
-    primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
-    secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80',
-    outline: 'border border-input hover:bg-accent hover:text-accent-foreground',
-    destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
-    ghost: 'hover:bg-accent hover:text-accent-foreground',
-    link: 'text-primary underline-offset-4 hover:underline',
+    primary: 'bg-beej-green text-white hover:bg-beej-green-dark shadow-md hover:shadow-lg transition-all duration-200',
+    secondary: 'bg-beej-beige text-beej-green hover:bg-beej-green/10 border border-beej-green/20',
+    outline: 'border-2 border-beej-green text-beej-green hover:bg-beej-green hover:text-white transition-all duration-200',
+    destructive: 'bg-red-500 text-white hover:bg-red-600 shadow-md hover:shadow-lg transition-all duration-200',
+    ghost: 'hover:bg-beej-green/10 text-beej-green hover:text-beej-green-dark transition-all duration-200',
+    link: 'text-beej-green underline-offset-4 hover:underline hover:text-beej-green-dark transition-all duration-200',
+    'whatsapp': 'bg-green-500 text-white hover:bg-green-600 shadow-md hover:shadow-lg transition-all duration-200',
+    'premium': 'bg-gradient-to-r from-beej-green to-beej-green-light text-white hover:from-beej-green-dark hover:to-beej-green shadow-lg hover:shadow-xl transition-all duration-300',
   }
   
   const sizes = {

@@ -38,6 +38,18 @@ export const fetchCategories = createAsyncThunk(
   }
 )
 
+export const fetchFeaturedProducts = createAsyncThunk(
+  'product/fetchFeaturedProducts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await productService.getProducts({ featured: true, limit: 4 })
+      return response
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch featured products')
+    }
+  }
+)
+
 export const searchProducts = createAsyncThunk(
   'product/searchProducts',
   async (query, { rejectWithValue }) => {
@@ -50,11 +62,36 @@ export const searchProducts = createAsyncThunk(
   }
 )
 
+export const fetchTrendingProducts = createAsyncThunk(
+  'product/fetchTrendingProducts',
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await productService.getProducts({ trending: true, limit: 8 })
+      return response
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch trending products')
+    }
+  }
+)
+
+export const fetchProductsByCategory = createAsyncThunk(
+  'product/fetchProductsByCategory',
+  async (categorySlug, { rejectWithValue }) => {
+    try {
+      const response = await productService.getProductsByCategory(categorySlug)
+      return response
+    } catch (error) {
+      return rejectWithValue(error.response?.data?.message || 'Failed to fetch products by category')
+    }
+  }
+)
+
 const initialState = {
   products: [],
   currentProduct: null,
   categories: [],
   featuredProducts: [],
+  trendingProducts: [],
   loading: false,
   error: null,
   pagination: {
@@ -142,6 +179,18 @@ const productSlice = createSlice({
         state.error = action.payload
         state.categories = []
       })
+      // Fetch Featured Products
+      .addCase(fetchFeaturedProducts.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(fetchFeaturedProducts.fulfilled, (state, action) => {
+        state.loading = false
+        state.featuredProducts = action.payload.products || []
+      })
+      .addCase(fetchFeaturedProducts.rejected, (state) => {
+        state.loading = false
+        state.featuredProducts = []
+      })
       // Search Products
       .addCase(searchProducts.pending, (state) => {
         state.loading = true
@@ -158,6 +207,32 @@ const productSlice = createSlice({
         }
       })
       .addCase(searchProducts.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.payload
+        state.products = []
+      })
+      // Fetch Trending Products
+      .addCase(fetchTrendingProducts.pending, (state) => {
+        state.loading = true
+      })
+      .addCase(fetchTrendingProducts.fulfilled, (state, action) => {
+        state.loading = false
+        state.trendingProducts = action.payload.products || []
+      })
+      .addCase(fetchTrendingProducts.rejected, (state, action) => {
+        state.loading = false
+        state.trendingProducts = []
+      })
+      // Fetch Products by Category
+      .addCase(fetchProductsByCategory.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchProductsByCategory.fulfilled, (state, action) => {
+        state.loading = false
+        state.products = action.payload.products || []
+      })
+      .addCase(fetchProductsByCategory.rejected, (state, action) => {
         state.loading = false
         state.error = action.payload
         state.products = []

@@ -5,45 +5,59 @@ const CategoryGrid = () => {
   const categories = [
     {
       id: 1,
-      name: 'Electronics',
-      slug: 'electronics',
-      image: 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=Electronics',
-      description: 'Latest gadgets and devices'
+      name: 'Chia Seeds',
+      slug: 'chia-seeds',
+      image: 'https://via.placeholder.com/300x200/10B981/FFFFFF?text=Chia+Seeds',
+      description: 'Premium organic chia seeds for nutrition'
     },
     {
       id: 2,
-      name: 'Clothing',
-      slug: 'clothing',
-      image: 'https://via.placeholder.com/300x200/10B981/FFFFFF?text=Clothing',
-      description: 'Fashion for everyone'
+      name: 'Pumpkin Seeds',
+      slug: 'pumpkin-seeds',
+      image: 'https://via.placeholder.com/300x200/F59E0B/FFFFFF?text=Pumpkin+Seeds',
+      description: 'Roasted pumpkin seeds rich in minerals'
     },
     {
       id: 3,
-      name: 'Books',
-      slug: 'books',
-      image: 'https://via.placeholder.com/300x200/F59E0B/FFFFFF?text=Books',
-      description: 'Books and literature'
+      name: 'Sunflower Seeds',
+      slug: 'sunflower-seeds',
+      image: 'https://via.placeholder.com/300x200/EF4444/FFFFFF?text=Sunflower+Seeds',
+      description: 'Nutritious sunflower seeds and kernels'
     },
     {
       id: 4,
-      name: 'Home & Garden',
-      slug: 'home-garden',
-      image: 'https://via.placeholder.com/300x300/8B5CF6/FFFFFF?text=Home+%26+Garden',
-      description: 'Home improvement items'
+      name: 'Sesame Seeds',
+      slug: 'sesame-seeds',
+      image: 'https://via.placeholder.com/300x200/8B5CF6/FFFFFF?text=Sesame+Seeds',
+      description: 'High-quality sesame seeds for cooking'
     },
     {
       id: 5,
-      name: 'Sports & Outdoors',
-      slug: 'sports-outdoors',
-      image: 'https://via.placeholder.com/300x200/EF4444/FFFFFF?text=Sports+%26+Outdoors',
-      description: 'Sports equipment'
+      name: 'Watermelon Seeds',
+      slug: 'watermelon-seeds',
+      image: 'https://via.placeholder.com/300x200/06B6D4/FFFFFF?text=Watermelon+Seeds',
+      description: 'Premium watermelon seeds for gardening'
     },
     {
       id: 6,
-      name: 'Toys & Games',
-      slug: 'toys-games',
-      image: 'https://via.placeholder.com/300x200/06B6D4/FFFFFF?text=Toys+%26+Games',
-      description: 'Fun for all ages'
+      name: 'Flax Seeds',
+      slug: 'flax-seeds',
+      image: 'https://via.placeholder.com/300x200/4F46E5/FFFFFF?text=Flax+Seeds',
+      description: 'Omega-3 rich flax seeds and ground flax'
+    },
+    {
+      id: 7,
+      name: 'Mixed Seeds',
+      slug: 'mixed-seeds',
+      image: 'https://via.placeholder.com/300x200/059669/FFFFFF?text=Mixed+Seeds',
+      description: 'Nutritious seed blends and trail mixes'
+    },
+    {
+      id: 8,
+      name: 'Exotic Seeds',
+      slug: 'exotic-seeds',
+      image: 'https://via.placeholder.com/300x200/DC2626/FFFFFF?text=Exotic+Seeds',
+      description: 'Rare and exotic seed varieties'
     }
   ]
 
