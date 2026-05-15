@@ -18,7 +18,7 @@ const Register = () => {
   const [showPassword, setShowPassword] = useState(false)
   
   const {
-    register,
+    register: registerField,
     handleSubmit,
     formState: { errors },
     watch,
@@ -41,7 +41,17 @@ const Register = () => {
 
   const onSubmit = async (data) => {
     try {
-      await dispatch(register(data)).unwrap()
+      // Only send required fields to backend
+      const registerData = {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        username: data.username,
+        email: data.email,
+        password: data.password,
+        phoneNumber: data.phoneNumber || null
+      }
+      
+      await dispatch(register(registerData)).unwrap()
       toast.success('Registration successful!')
     } catch (error) {
       // Error is handled in the slice and useEffect
@@ -75,7 +85,7 @@ const Register = () => {
               <Input
                 label="First Name"
                 type="text"
-                {...register('firstName', {
+                {...registerField('firstName', {
                   required: 'First name is required',
                 })}
                 error={errors.firstName?.message}
@@ -85,7 +95,7 @@ const Register = () => {
               <Input
                 label="Last Name"
                 type="text"
-                {...register('lastName', {
+                {...registerField('lastName', {
                   required: 'Last name is required',
                 })}
                 error={errors.lastName?.message}
@@ -96,11 +106,15 @@ const Register = () => {
             <Input
               label="Username"
               type="text"
-              {...register('username', {
+              {...registerField('username', {
                 required: 'Username is required',
                 minLength: {
                   value: 3,
                   message: 'Username must be at least 3 characters',
+                },
+                maxLength: {
+                  value: 50,
+                  message: 'Username must not exceed 50 characters',
                 },
               })}
               error={errors.username?.message}
@@ -110,7 +124,7 @@ const Register = () => {
             <Input
               label="Email"
               type="email"
-              {...register('email', {
+              {...registerField('email', {
                 required: 'Email is required',
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
@@ -124,7 +138,7 @@ const Register = () => {
             <Input
               label="Phone Number"
               type="tel"
-              {...register('phoneNumber')}
+              {...registerField('phoneNumber')}
               placeholder="Enter your phone number (optional)"
             />
             
@@ -132,11 +146,15 @@ const Register = () => {
               <Input
                 label="Password"
                 type={showPassword ? 'text' : 'password'}
-                {...register('password', {
+                {...registerField('password', {
                   required: 'Password is required',
                   minLength: {
                     value: 6,
                     message: 'Password must be at least 6 characters',
+                  },
+                  maxLength: {
+                    value: 100,
+                    message: 'Password must not exceed 100 characters',
                   },
                 })}
                 error={errors.password?.message}
@@ -149,7 +167,7 @@ const Register = () => {
               >
                 {showPassword ? (
                   <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                   </svg>
                 ) : (
                   <svg className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,7 +181,7 @@ const Register = () => {
             <Input
               label="Confirm Password"
               type="password"
-              {...register('confirmPassword', {
+              {...registerField('confirmPassword', {
                 required: 'Please confirm your password',
                 validate: (value) => value === password || 'Passwords do not match',
               })}
@@ -177,7 +195,7 @@ const Register = () => {
               id="agree-terms"
               type="checkbox"
               className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-              {...register('agreeTerms', {
+              {...registerField('agreeTerms', {
                 required: 'You must agree to the terms and conditions',
               })}
             />

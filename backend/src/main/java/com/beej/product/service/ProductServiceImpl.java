@@ -9,12 +9,14 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
@@ -44,12 +46,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new com.beej.exception.ResourceNotFoundException("Product not found with id: " + id));
         
+        initializeLazyCollections(product);
         return productMapper.toProductResponseDTO(product);
     }
 
     @Override
     public List<ProductResponseDTO> getFeaturedProducts() {
         List<Product> products = productRepository.findTop4ByFeaturedTrue();
+        products.forEach(this::initializeLazyCollections);
         return products.stream()
                 .map(productMapper::toProductResponseDTO)
                 .toList();
@@ -58,12 +62,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductResponseDTO> searchProducts(String query, Pageable pageable) {
         Page<Product> products = productRepository.findByNameContaining(query, pageable);
+        products.forEach(this::initializeLazyCollections);
         return products.map(productMapper::toProductResponseDTO);
     }
 
     @Override
     public List<ProductResponseDTO> getNewArrivals() {
         List<Product> products = productRepository.findTop8ByStatusOrderByCreatedAtDesc("ACTIVE");
+        products.forEach(this::initializeLazyCollections);
         return products.stream()
                 .map(productMapper::toProductResponseDTO)
                 .toList();
@@ -71,11 +77,22 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<ProductResponseDTO> getTrendingProducts() {
-        // For now, return featured products as trending
-        // In a real application, this would be based on sales data, views, etc.
         List<Product> products = productRepository.findTop4ByFeaturedTrue();
+        products.forEach(this::initializeLazyCollections);
         return products.stream()
                 .map(productMapper::toProductResponseDTO)
                 .toList();
+    }
+
+    private void initializeLazyCollections(Product product) {
+        if (product.getCategory() != null) {
+            product.getCategory().getId();
+        }
+        if (product.getImages() != null) {
+            product.getImages().size();
+        }
+        if (product.getInventory() != null) {
+            product.getInventory().getId();
+        }
     }
 }

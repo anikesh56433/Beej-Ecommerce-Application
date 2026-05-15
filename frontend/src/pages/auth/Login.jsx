@@ -69,14 +69,18 @@ const Login = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
            <Input
-             label="Username or Email"
-             type="text"
-             autoComplete="username"
-             {...register('username', {
-               required: 'Username or email is required',
+             label="Email Address"
+             type="email"
+             autoComplete="email"
+             {...register('email', {
+               required: 'Email is required',
+               pattern: {
+                 value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                 message: 'Invalid email address',
+               },
              })}
-             error={errors.username?.message}
-             placeholder="Enter your username or email"
+             error={errors.email?.message}
+             placeholder="Enter your email"
            />
 
             <div className="relative">
